@@ -51,7 +51,7 @@ def run_simulation(num, kata, rerolls):
 		rolls = [x for x in rolls if x > 1]
 
 	if len(rolls) > 0:
-		return max(rolls) + len(rolls) - 1
+		return max(rolls) + min(len(rolls) - 1, 2)
 
 	return 0
 
