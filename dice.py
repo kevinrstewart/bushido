@@ -22,11 +22,11 @@ def run_simulations(num, simulations, kata, rerolls):
 	plot.show()
 
 
-def run_opposed(attack, defence, simulations, kata, rerolls, defender_kata, defender_rerolls):
+def run_opposed(attack, defence, simulations, kata, rerolls, unblockable, defender_kata, defender_rerolls):
 	results = []
 
 	for i in range(simulations):
-		results.append(run_simulation(attack, kata, rerolls) - run_simulation(defence, defender_kata, defender_rerolls))
+		results.append(run_simulation(attack, kata, rerolls, 0) - run_simulation(defence, defender_kata, defender_rerolls, unblockable))
 
 	hist = Counter(results)
 	
@@ -36,7 +36,7 @@ def run_opposed(attack, defence, simulations, kata, rerolls, defender_kata, defe
 	plot.bar(keys, np.divide(list(vals), simulations))
 	plot.show()
 
-def run_simulation(num, kata, rerolls):
+def run_simulation(num, kata, rerolls, unblockable):
 	rolls = []
 	for i in range(num):
 		rolls.append(d6())
@@ -50,6 +50,10 @@ def run_simulation(num, kata, rerolls):
 	if not kata:
 		rolls = [x for x in rolls if x > 1]
 
+	if unblockable > 0 and len(rolls) > 0:
+		for i in range(unblockable):
+			rolls.remove(max(rolls))
+		
 	if len(rolls) > 0:
 		return max(rolls) + min(len(rolls) - 1, 2)
 
@@ -67,10 +71,11 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--defence', default=0, help='the number of dice to defend with, if included will run opposed simulations', type=int)
     parser.add_argument('-dk', '--d_kata', default=False, help="does the defender have Kata")
     parser.add_argument('-drr', '--d_rerolls', default=0, help='the number of rerolls for the defender', type=int)
+    parser.add_argument('-u', '--unblockable', default=0, help='the amount of unblockable', type=int)
 
     args = parser.parse_args()
 
     if args.defence == 0:
     	run_simulations(args.num, args.simulations, args.kata, args.rerolls)
     else:
-    	run_opposed(args.num, args.defence, args.simulations, args.kata, args.rerolls, args.d_kata, args.d_rerolls)
+    	run_opposed(args.num, args.defence, args.simulations, args.kata, args.rerolls, args.unblockable, args.d_kata, args.d_rerolls)
